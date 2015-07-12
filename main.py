@@ -5,7 +5,6 @@ class Game(object):
 		self.no_contain = set()
 		self.word_length = word_length;
 		self.word = "_" * word_length
-		self.word_db = 
 
 	def display_word(self):
 		
