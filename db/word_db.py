@@ -58,8 +58,9 @@ class WordDB(object):
 				ans[i] += letter_count[i]
 		return ans
 
-	def most_common_letter(self):
-		letter_sums = self.get_letter_sums()
-		max_i = letter_sums.index(max(letter_sums))
-		return chr(ord("A") + max_i);
+	def common_letters(self):
+		letter_sums = [(chr(ord("A") + a, a) for a in self.get_letter_sums()]
+		return sorted(letter_sums, key = lambda (letter, num): num))
 
+	def random_word(self):
+		return "HELLO"
