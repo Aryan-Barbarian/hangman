@@ -21,14 +21,8 @@ class WordDB(object):
 				word = "".join(line.split()).upper();
 				if word.find("'S") != -1: # Deal with later
 					continue;
-				length = len(word);
-				num_letters = get_num_letters(word)
-				row = [word, length] + num_letters
-				all_words.append(row)
-				num_words += 1
+				all_words.append(word)
 		return all_words
-
-
 
 	# MUST BE UPPER CASE AND ONLY LETTERS
 	def get_num_letters(self, word):
@@ -40,5 +34,32 @@ class WordDB(object):
 				ans[index] += 1
 		return ans
 
+	def filter(self, game_word, no_contain):
+		word_len = len(game_word)
+		def fn(word):
+			if len(word) != word_len:
+				return False
+			for i in range(word_len):
+				if game_word[i] != "_" and game_word[i] != word[i]:
+					return False
+			for char in no_contain:
+				if char in word:
+					return False
+			return True
 
-	a = process_file("linux_words.txt")
+		new_words =  filter(fn, self.words)
+		return WordDB(words=new_words);
+
+	def get_letter_sums(self):
+		ans = [0 for i in range(26)]
+		for word in self.words:
+			letter_count = self.get_num_letters(word)
+			for i in range(26):
+				ans[i] += letter_count[i]
+		return ans
+
+	def most_common_letter(self):
+		letter_sums = self.get_letter_sums()
+		max_i = letter_sums.index(max(letter_sums))
+		return chr(ord("A") + max_i);
+
