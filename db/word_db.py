@@ -1,3 +1,4 @@
+import random
 
 class WordDB(object):
 
@@ -5,7 +6,7 @@ class WordDB(object):
 		if words is not None:
 			self.words = words
 		elif word_file is not None:
-			self.words = process_file(word_file)
+			self.words = self.process_file(word_file)
 		else:
 			self.words = list()
 
@@ -31,7 +32,7 @@ class WordDB(object):
 		for char in word:
 			index = ord(char) - ord("A")
 			if index < 26:
-				ans[index] += 1
+				ans[index] = 1
 		return ans
 
 	def filter(self, game_word, no_contain):
@@ -59,8 +60,10 @@ class WordDB(object):
 		return ans
 
 	def common_letters(self):
-		letter_sums = [(chr(ord("A") + a, a) for a in self.get_letter_sums()]
-		return sorted(letter_sums, key = lambda (letter, num): num))
+		letter_sums = self.get_letter_sums()
+		letter_sums = [(chr(ord("A") + i), letter_sums[i]) for i in \
+			range(len(letter_sums))]
+		return sorted(letter_sums, reverse=True, key = lambda (letter, num): num)
 
 	def random_word(self):
-		return "HELLO"
+		return random.choice(self.words)
