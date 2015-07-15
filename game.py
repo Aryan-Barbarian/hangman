@@ -12,23 +12,24 @@ clear - Clears the screen
 
 class Game(object):
 	def __init__(self):
-		self.guesser = HumanGuesser()
-		self.knower = HumanKnower
+		self._word_db = WordDB(word_file="./db/count.txt")
+
+		self.guesser = HumanGuesser(self)
+		self.knower = HumanKnower(self)
 		self.word = ""
 		
-		known_positions = set()
+		self.known_positions = set()
 		self.guesses = set()
 		self.wrongs = set()
 
 		self.started = False
-		self._word_db = WordDB(word_file="./db/count.txt")
 
 	def visible_word(self):
 		ans = ""
 
 		for i in range(len(self.word)):
 			if i in self.known_positions:
-				ans += word[i]
+				ans += self.word[i]
 			else:
 				ans += "_"
 		return ans
@@ -45,17 +46,22 @@ class Game(object):
 		print(to_print2)
 
 	def clear_screen(self):
-		print("\n" * 100)
+		print("\n" * 80)
 
 	def play_game(self):
-		while True
+		while "_" in self.visible_word() or len(self.word) == 0:
 			if not self.started:
-				move = input("> ").split()
+				move = raw_input("> ").split()
 			else:
 				move = self.guesser.move().split()
-			play_turn(move)
+			if len(move) != 0:
+				self.play_turn(move)
+				self.display_word()
+		print("YOU WON IN {} GUESSES".format(len(self.guesses)))
 
-	def play_turn(self, move):	
+	def display_stickman()
+
+	def play_turn(self, move):
 		name = move[0]
 		
 		if name ==  "help":
@@ -66,6 +72,9 @@ class Game(object):
 				self.knower = AIKnower(self)
 			elif move[1] == "guesser":
 				self.guesser = AIGuesser(self)
+			elif move[1] == "all":
+				self.guesser = AIGuesser(self)
+				self.knower = AIKnower(self)
 			else:
 				print("Unknown argument: {}".format(move[1]))
 
@@ -74,14 +83,18 @@ class Game(object):
 				self.knower = HumanKnower(self)
 			elif move[1] == "guesser":
 				self.guesser = HumanGuesser(self)
+			elif move[1] == "all":
+				self.guesser = HumanGuesser(self)
+				self.knower = HumanKnower(self)
 			else:
 				print("Unknown argument: {}".format(move[1]))
 		
 		elif name == "start":
-			if len(word) == 0:
-				new_word = knower.get_word() # TODO: Turn this to a do while loop
+			if len(self.word) == 0:
+				new_word = self.knower.get_word() # TODO: Turn this to a do while loop
 				while not self.validate_word(new_word):
-					new_word = knower.get_word()
+					new_word = self.knower.get_word()
+				self.word = new_word.upper()
 			self.started = True
 			self.clear_screen()
 			print("Game started!")
@@ -117,22 +130,25 @@ class Game(object):
 
 	@property
 	def word_db(self):
-	    return self._word_db[:]
+	    return self._word_db.copy()
 	
 	def handle_guess(self, guessed_letter):
+		guessed_letter = guessed_letter.upper()
 		if guessed_letter in self.guesses:
 			print("You've guessed this before")
 			return;
 
 		self.guesses.add(guessed_letter)
-		result = self.knower.handle_guess(guessed_letter)
-		if not result:
+		correct = False
+		for i in range(len(self.word)):
+			if self.word[i] == guessed_letter:
+				correct = True
+				self.known_positions.add(i)
+		if not correct:
 			print("This is incorrect")
 			self.wrongs.add(guessed_letter)
 		else:
 			print("Correct!")
-			for position in results:
-				self.known_positions.add(position)
 
 	def printbuff(self):
 		print("*"*20)
@@ -166,7 +182,7 @@ class AIGuesser(Guesser):
 
 class HumanGuesser(Guesser):
 	def move(self):
-		return input("> ")
+		return raw_input("> ")
 
 class Knower(object):
 	def __init__(self, game):
@@ -176,14 +192,17 @@ class Knower(object):
 	def get_word(self):
 		pass
 
+
 class AIKnower(Knower):
 	def get_word(self):
 		return self.word_db.random_word()
 
 class HumanKnower(Knower):
 	def get_word(self):
-		return input("Before you start, what's the word?")
+		return raw_input("Before you start, what's the word?")
 
 def main():
 	game = Game()
 	game.play_game()
+
+main()
