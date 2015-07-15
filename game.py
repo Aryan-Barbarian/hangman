@@ -1,14 +1,6 @@
 from db.word_db import WordDB
-
-usuage = """
-help - Prints commands
-auto <knower/guesser> - will make one of these automatic
-start - starts the game
-guess <letter> - guesses this letter
-hint - prints the letter that the AI would pick
-word <new_word> - Restarts the game if in progress and sets this as the word
-clear - Clears the screen
-"""
+from players import HumanGuesser, HumanKnower, AIKnower, AIGuesser
+from config import stickman, usuage
 
 class Game(object):
 	def __init__(self):
@@ -49,6 +41,7 @@ class Game(object):
 		print("\n" * 80)
 
 	def play_game(self):
+
 		while "_" in self.visible_word() or len(self.word) == 0:
 			if not self.started:
 				move = raw_input("> ").split()
@@ -57,9 +50,14 @@ class Game(object):
 			if len(move) != 0:
 				self.play_turn(move)
 				self.display_word()
+				self.display_stickman()
 		print("YOU WON IN {} GUESSES".format(len(self.guesses)))
 
-	def display_stickman()
+	def display_stickman(self):
+		num_wrong = len(self.wrongs)
+		if num_wrong >= len(stickman):
+			num_wrong = len(stickman) - 1
+		print(stickman[num_wrong])
 
 	def play_turn(self, move):
 		name = move[0]
@@ -109,13 +107,17 @@ class Game(object):
 		elif name == "hint":
 			if not self.started:
 				print("To make this move, you must first start the game")
+			else:
+				best = self.guesser.best_letter()
+				print("The AI suggests \"{}\"".format(best))
 
 		elif name == "word":
 			new_word = move[1]
+			print(new_word)
 			if self.validate_word(new_word):
 				self.started = False
 				self.guesser.reset()
-				self.word = word
+				self.word = new_word.upper()
 				self.clear_screen()
 				print("New Word Set")
 			else:
@@ -155,54 +157,3 @@ class Game(object):
 
 	def validate_word(self, word):
 		return True # TODO: Implement this later
-
-class Guesser(object):
-	def __init__(self, game):
-		self.game = game
-		self.word_db = game.word_db
-
-	def best_letter(self):
-		game_word = self.game.visible_word()
-		no_contains = self.game.wrongs
-		self.word_db = self.word_db.filter(game_word, no_contains)
-		guesses = self.game.guesses
-		for letter, num_occurrences in self.word_db.common_letters():
-			if letter not in guesses:
-				return letter
-
-	def move(self):
-		pass
-
-	def reset(self):
-		self.word_db = game.word_db
-
-class AIGuesser(Guesser):
-	def move(self):
-		return "guess {}".format(self.best_letter())
-
-class HumanGuesser(Guesser):
-	def move(self):
-		return raw_input("> ")
-
-class Knower(object):
-	def __init__(self, game):
-		self.game = game
-		self.word_db = game.word_db
-
-	def get_word(self):
-		pass
-
-
-class AIKnower(Knower):
-	def get_word(self):
-		return self.word_db.random_word()
-
-class HumanKnower(Knower):
-	def get_word(self):
-		return raw_input("Before you start, what's the word?")
-
-def main():
-	game = Game()
-	game.play_game()
-
-main()

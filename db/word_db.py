@@ -1,5 +1,5 @@
 import random
-
+# TODO: Make this fully immutable
 class WordDB(object):
 
 	def __init__(self, word_counts=None, word_file=None):
@@ -9,6 +9,7 @@ class WordDB(object):
 			self.word_counts = self.process_file(word_file)
 		else:
 			raise Exception("You must provide either a word list or a word file")
+		# print(self.word_counts[:50])
 
 
 	"""
@@ -18,15 +19,13 @@ class WordDB(object):
 		words_with_counts = list()
 		with open(filepath) as f:
 			for line in f:
-				line = line.split()
+				line = line.split("\t")
 				if len(line) > 1:
 					word, count = line
 				else:
-					word, count = line[0], 1;
-				word = word.upper()
+					continue
+				word = word.upper().replace("\n","")
 				count = int(count)
-				if word.find("'S") != -1: # TODO: Deal with later
-					continue;
 				words_with_counts.append((word, count))
 		return words_with_counts
 
@@ -65,12 +64,19 @@ class WordDB(object):
 				ans[i] += letter_count[i]
 		return ans
 
-	def common_letters(self):
+	def common_letters(self, no_contain=set()):
 		letter_sums = self.get_letter_sums()
 		letter_sums = [(chr(ord("A") + i), letter_sums[i]) for i in \
 			range(len(letter_sums))]
+		letter_sums = filter(lambda (letter, sum): letter not in no_contain, letter_sums)
 		return sorted(letter_sums, reverse=True, key = lambda (letter, num): num)
 
 
 	def random_word(self):
-		return random.choice(self.word_counts)[0]
+		index = random.randint(0, len(self.word_counts))
+		print(self.word_counts[index - 10: index + 10])
+		ans = self.word_counts[index]
+		return ans[0]
+
+	def copy(self):
+		return WordDB(word_counts=self.word_counts[:])
